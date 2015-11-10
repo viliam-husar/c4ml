@@ -1,0 +1,113 @@
+model:
+    name: XXXX
+    desc: eCommerce Platform
+    internal-systems:
+        site:
+            name: "eCommerce Site"
+            desc: ""
+            containers:
+                site-reverse-proxy-varnish:
+                    name: Reverse Proxy
+                    desc: ""
+                    type: "Varnish 4"
+                    uses:
+                        site-web-server-apache:
+                            for: ""
+                            desc: ""
+                            type: ""
+                site-web-server-apache:
+                    name: Web Server
+                    desc: ""
+                    type: "Apache 2.4"
+                    uses:
+                        site-web-app-php-fpm:
+                            for: ""
+                            desc: ""
+                            type: ""
+                site-web-app-php-fpm:
+                    name: Web Application
+                    desc: ""
+                    type: "PHP-FPM 5.5"
+                    uses:
+                        site-rdbs-postgres:
+                            for: ""
+                            desc: ""
+                            type: ""
+                        orders-web-server-apache:
+                            for: ""
+                            desc: ""
+                            type: ""
+                site-web-server-site-management-apache:
+                    name: Web Server [Site Management]
+                    desc: ""
+                    type: "Apache 2.4"
+                    uses:
+                        site-web-app-site-management-php-fpm:
+                            for: ""
+                            desc: ""
+                            type: ""
+                site-web-app-site-management-php-fpm:
+                    name: Web Application [Site Management]
+                    desc: ""
+                    type: "PHP-FPM 5.5"
+                    uses:
+                        site-rdbs-postgres:
+                            for: ""
+                            desc: ""
+                            type: ""
+                site-rdbs-postgres:
+                    name: Relational Database
+                    desc: ""
+                    type: "PostgreSQL"
+                    uses: []
+        orders:
+            name: "Orders Management"
+            desc: ""
+            containers:
+                orders-web-server-apache:
+                    name: Web Server
+                    desc: ""
+                    type: "Apache 2.4"
+                    uses:
+                        orders-web-app-php-fpm:
+                            for: ""
+                            desc: ""
+                            type: ""
+                orders-web-app-php-fpm:
+                    name: Web Application
+                    desc: ""
+                    type: "PHP-FPM 5.5"
+                    uses:
+                        orders-rdbs-postgres:
+                            for: ""
+                            desc: ""
+                            type: ""
+                orders-rdbs-postgres:
+                    name: Relational Database
+                    desc: ""
+                    type: "PostgreSQL"
+                    uses: []
+    external-systems: []
+    internal-users:
+        admin:
+            name: "Administrator"
+            desc: ""
+            uses:
+                site-web-server-site-management-apache:
+                    for: ""
+                    desc: ""
+                    type: ""
+                orders-web-server-apache:
+                    for: ""
+                    desc: ""
+                    type: ""
+    external-users:
+        customer:
+            name: "Customer"
+            desc: ""
+            uses:
+                site-reverse-proxy-varnish:
+                    for: ""
+                    desc: ""
+                    type: ""
+
