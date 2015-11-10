@@ -5,12 +5,13 @@
   "type": "project",
   "require": {
     "php": ">=5.5",
-    "symfony/class-loader": "~2.3",
-    "symfony/config": "~2.3",
-    "symfony/console": "~2.3",
-    "symfony/yaml": "~2.3",
-    "symfony/process": "~2.3",
-    "phpdocumentor/graphviz": "~1.0"
+    "symfony/class-loader": "~2.7",
+    "symfony/config": "~2.7",
+    "symfony/console": "~2.7",
+    "symfony/yaml": "~2.7",
+    "symfony/process": "~2.7",
+    "phpdocumentor/graphviz": "~1.0",
+    "symfony/options-resolver": "~2.7"
   },
   "autoload": {
     "psr-4": {

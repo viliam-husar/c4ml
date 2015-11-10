@@ -2,6 +2,7 @@
 
 namespace ViliamHusar\C4ml\GraphvizGenerator;
 
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use ViliamHusar\C4ml\Model\Container;
 use ViliamHusar\C4ml\Model\ExternalSystem;
 use ViliamHusar\C4ml\Model\ExternalUser;
@@ -22,17 +23,33 @@ class GraphvizGenerator
 
     public function __construct(array $options = [])
     {
-        $this->options = $options;
+        $resolver = new OptionsResolver();
+        $this->configureOptions($resolver);
+
+        $this->options = $resolver->resolve($options);
+    }
+
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults(array(
+            'color' => '#263238', // Blue Gray - 900
+            'fill-color-1' => '#ECEFF1', // Blue Gray - 50
+            'fill-color-2' => '#90A4AE', // Blue Gray - 300
+            'highlight-color' => '#B71C1C', // Red - 900
+            'highlight-fill-color-1' => '#FFEBEE', // Red - #50
+            'highlight-fill-color-2' => '#E57373', // Red - 300
+        ));
     }
 
     /**
      * @param Model $model
      * @param string $mode
      * @param array $internalSystemIds
+     * @param array $highlights
      *
      * @return Graph
      */
-    public function generate(Model $model, $mode = self::MODE_ALL, array $internalSystemIds = [])
+    public function generate(Model $model, $mode = self::MODE_ALL, array $internalSystemIds = [], array $highlights = [])
     {
         $elementsNodes = [];
         $requiredElementsIds = [];
@@ -50,7 +67,14 @@ class GraphvizGenerator
             $graph->addGraph($internalSystemGraph);
 
             foreach ($internalSystem->getContainers() as $container) {
-                $containerNode = $this->createContainerNode($container);
+                $highlight = false;
+
+                if (in_array($container->getId(), $highlights)) {
+                    $highlight = true;
+                }
+
+
+                $containerNode = $this->createContainerNode($container, $highlight);
                 $elementsNodes[$container->getId()] = $containerNode;
                 $internalSystemGraph->setNode($containerNode);
 
@@ -110,7 +134,13 @@ class GraphvizGenerator
         // add nodes for internal users
         foreach ($model->getInternalUsers() as $internalUser) {
             if (in_array($internalUser->getId(), $requiredElementsIds)) {
-                $internalUserNode = $this->createInternalUserNode($internalUser);
+                $highlight = false;
+
+                if (in_array($internalUser->getId(), $highlights)) {
+                    $highlight = true;
+                }
+
+                $internalUserNode = $this->createInternalUserNode($internalUser, $highlight);
                 $graph->setNode($internalUserNode);
                 $elementsNodes[$internalUser->getId()] = $internalUserNode;
             }
@@ -119,7 +149,13 @@ class GraphvizGenerator
         // add nodes for external users
         foreach ($model->getExternalUsers() as $externalUser) {
             if (in_array($externalUser->getId(), $requiredElementsIds)) {
-                $externalUserNode = $this->createExternalUserNode($externalUser);
+                $highlight = false;
+
+                if (in_array($externalUser->getId(), $highlights)) {
+                    $highlight = true;
+                }
+
+                $externalUserNode = $this->createExternalUserNode($externalUser, $highlight);
                 $graph->setNode($externalUserNode);
                 $elementsNodes[$externalUser->getId()] = $externalUserNode;
             }
@@ -128,7 +164,13 @@ class GraphvizGenerator
         // add nodes for external systems
         foreach ($model->getExternalSystems() as $externalSystem) {
             if (in_array($externalSystem->getId(), $requiredElementsIds)) {
-                $externalSystemNode = $this->createExternalSystemNode($externalSystem);
+                $highlight = false;
+
+                if (in_array($externalSystem->getId(), $highlights)) {
+                    $highlight = true;
+                }
+
+                $externalSystemNode = $this->createExternalSystemNode($externalSystem, $highlight);
                 $graph->setNode($externalSystemNode);
                 $elementsNodes[$externalSystem->getId()] = $externalSystemNode;
             }
@@ -136,7 +178,8 @@ class GraphvizGenerator
 
         // add nodes for internal systems
         foreach ($model->getInternalSystems() as $internalSystem) {
-            $internalSystemNode = null;
+            $createInternalSystemNode = null;
+            $highlight = false;
 
             foreach ($internalSystem->getContainers() as $container) {
                 if (in_array($container->getId(), array_keys($elementsNodes))) {
@@ -144,20 +187,34 @@ class GraphvizGenerator
                 }
 
                 if (in_array($container->getId(), $requiredElementsIds)) {
-                    if (null === $internalSystemNode) {
-                        $internalSystemNode = $this->createInternalSystemNode($internalSystem);
-                        $graph->setNode($internalSystemNode);
+                    $createInternalSystemNode = true;
+
+                    if (in_array($container->getId(), $highlights)) {
+                        $highlight = true;
                     }
+                }
+
+                if (true === $createInternalSystemNode) {
+                    $internalSystemNode = $this->createInternalSystemNode($internalSystem);
+                    $graph->setNode($internalSystemNode);
 
                     $elementsNodes[$container->getId()] = $internalSystemNode;
                 }
+
+
             }
         }
 
         // create edges
         foreach ($connections as $sourceElementId => $targetElements) {
             foreach ($targetElements as $targetElementId => $usages) {
-                $edge = $this->createConnectionEdge($elementsNodes[$sourceElementId], $elementsNodes[$targetElementId], $usages);
+                $highlight = false;
+
+                if (in_array($sourceElementId, $highlights) || in_array($targetElementId, $highlights)) {
+                    $highlight = true;
+                }
+
+                $edge = $this->createConnectionEdge($elementsNodes[$sourceElementId], $elementsNodes[$targetElementId], $usages, $highlight);
 
                 $graph->link($edge);
             }
@@ -185,7 +242,7 @@ LABEL;
             ->setLabel(trim($label))
             ->setStyle('rounded')
             ->setFontsize(10)
-            ->setFontcolor('#263238')
+            ->setFontcolor($this->options['color'])
             ->setFontname('helvetica')
             ->setShape('box')
             ->setColor('#263238');
@@ -193,7 +250,7 @@ LABEL;
         return $internalSystemGraph;
     }
 
-    protected function createExternalSystemNode(ExternalSystem $externalSystem)
+    protected function createExternalSystemNode(ExternalSystem $externalSystem, $highlight)
     {
         $description = wordwrap($externalSystem->getDescription(), 20, "<br />\n");
 
@@ -211,15 +268,15 @@ LABEL;
         $externalSystemNode
             ->setStyle('rounded,dashed')
             ->setFontsize(10)
-            ->setFontcolor('#263238')
+            ->setFontcolor(true === $highlight ? $this->options['highlight-color'] : $this->options['color'])
             ->setFontname('helvetica')
             ->setShape('box')
-            ->setColor('#263238');
+            ->setColor(true === $highlight ? $this->options['highlight-color'] : $this->options['color']);
 
         return $externalSystemNode;
     }
 
-    protected function createInternalSystemNode(InternalSystem $internalSystem)
+    protected function createInternalSystemNode(InternalSystem $internalSystem, $highlight)
     {
         $description = wordwrap($internalSystem->getDescription(), 20, "<br />\n");
 
@@ -237,15 +294,15 @@ LABEL;
         $internalSystemNode
             ->setStyle('rounded')
             ->setFontsize(10)
-            ->setFontcolor('#263238')
+            ->setFontcolor(true === $highlight ? $this->options['highlight-color'] : $this->options['color'])
             ->setFontname('helvetica')
             ->setShape('box')
-            ->setColor('#263238');
+            ->setColor(true === $highlight ? $this->options['highlight-color'] : $this->options['color']);
 
         return $internalSystemNode;
     }
 
-    protected function createContainerNode(Container $container)
+    protected function createContainerNode(Container $container, $highlight = false)
     {
         $description = wordwrap($container->getDescription(), 20, "<br />\n");
 
@@ -269,17 +326,17 @@ LABEL;
         $containerNode
             ->setStyle('rounded,filled')
             ->setFontsize(10)
-            ->setFontcolor('#263238')
+            ->setFontcolor(true === $highlight ? $this->options['highlight-color'] : $this->options['color'])
             ->setFontname('helvetica')
             ->setShape('box')
-            ->setColor('#263238')
-            ->setFillcolor('#ECEFF1:#90A4AE')
+            ->setColor(true === $highlight ? $this->options['highlight-color'] : $this->options['color'])
+            ->setFillcolor(true === $highlight ? $this->options['highlight-fill-color-1'] . ':' . $this->options['highlight-fill-color-2'] : $this->options['fill-color-1'] . ':' . $this->options['fill-color-2'])
             ->setGradientangle(270);
 
         return $containerNode;
     }
 
-    protected function createInternalUserNode(InternalUser $internalUser)
+    protected function createInternalUserNode(InternalUser $internalUser, $highlight)
     {
         $description = wordwrap($internalUser->getDescription(), 20, "<br />\n");
 
@@ -296,15 +353,15 @@ LABEL;
         $internalUserNode = Node::create($internalUser->getId(), trim($label));
         $internalUserNode
             ->setFontsize(10)
-            ->setFontcolor('#263238')
+            ->setFontcolor(true === $highlight ? $this->options['highlight-color'] : $this->options['color'])
             ->setFontname('helvetica')
             ->setShape('underline')
-            ->setColor('#263238');
+            ->setColor(true === $highlight ? $this->options['highlight-color'] : $this->options['color']);
 
         return $internalUserNode;
     }
 
-    protected function createExternalUserNode(ExternalUser $externalUser)
+    protected function createExternalUserNode(ExternalUser $externalUser, $highlight)
     {
         $description = wordwrap($externalUser->getDescription(), 20, "<br />\n");
 
@@ -322,10 +379,10 @@ LABEL;
         $externalUserNode
             ->setStyle('dashed')
             ->setFontsize(10)
-            ->setFontcolor('#263238')
+            ->setFontcolor(true === $highlight ? $this->options['highlight-color'] : $this->options['color'])
             ->setFontname('helvetica')
             ->setShape('underline')
-            ->setColor('#263238');
+            ->setColor(true === $highlight ? $this->options['highlight-color'] : $this->options['color']);
 
         return $externalUserNode;
     }
@@ -334,10 +391,11 @@ LABEL;
      * @param Node $sourceNode
      * @param Node $targetNode
      * @param Usage[] $usages
+     * @param bool $highlight
      *
      * @return Edge
      */
-    protected function createConnectionEdge(Node $sourceNode, Node $targetNode, array $usages = [])
+    protected function createConnectionEdge(Node $sourceNode, Node $targetNode, array $usages = [], $highlight = false)
     {
         $labels = [];
 
@@ -372,9 +430,9 @@ LABEL;
         $edge
             ->setLabel(trim($label))
             ->setFontsize(10)
-            ->setFontcolor('#263238')
+            ->setFontcolor(true === $highlight ? $this->options['highlight-color'] : $this->options['color'])
             ->setFontname('helvetica')
-            ->setColor('#263238');
+            ->setColor(true === $highlight ? $this->options['highlight-color'] : $this->options['color']);
 
         return $edge;
     }

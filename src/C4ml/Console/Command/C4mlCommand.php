@@ -21,6 +21,7 @@ class C4mlCommand extends Command
         $this->addArgument('source', InputArgument::REQUIRED);
         $this->addArgument('output', InputArgument::REQUIRED);
         $this->addOption('system', 's', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, "Specify internal systems with container view", []);
+        $this->addOption('highlight', 'l', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, "Specify elements to highlight", []);
         $this->addOption('config', 'c', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, "Sets diagram options", []);
         $this->addOption('raw', 'r', InputOption::VALUE_NONE, "Returns raw DOT file");
         $this->addOption('format', 'f', InputOption::VALUE_OPTIONAL, "Output format of diagram (svg, png, jpeg)", 'svg');
@@ -41,7 +42,7 @@ class C4mlCommand extends Command
             $mode = GraphvizGenerator::MODE_SELECTIVE;
         }
 
-        $graph = $graphvizGenerator->generate($model, $mode, $input->getOption('system'));
+        $graph = $graphvizGenerator->generate($model, $mode, $input->getOption('system'), $input->getOption('highlight'));
 
         $dotFile = tempnam(sys_get_temp_dir(), 'c4ml');
         file_put_contents($dotFile, (string)$graph);
