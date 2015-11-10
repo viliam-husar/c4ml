@@ -1,0 +1,20 @@
+{
+  "name": "viliam-husar/c4ml",
+  "description": "C4 Architecture Diagram Generator",
+  "license": "MIT",
+  "type": "project",
+  "require": {
+    "php": ">=5.5",
+    "symfony/class-loader": "~2.3",
+    "symfony/config": "~2.3",
+    "symfony/console": "~2.3",
+    "symfony/yaml": "~2.3",
+    "symfony/process": "~2.3",
+    "phpdocumentor/graphviz": "~1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "ViliamHusar\\": "src/"
+    }
+  }
+}

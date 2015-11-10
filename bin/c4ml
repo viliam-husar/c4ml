@@ -1,0 +1,12 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+set_time_limit(0);
+
+use ViliamHusar\C4ml\Console\C4mlApplication;
+use ViliamHusar\C4ml\C4ml;
+
+$application = new C4mlApplication('C4ML', C4ml::VERSION);
+$application->run();
