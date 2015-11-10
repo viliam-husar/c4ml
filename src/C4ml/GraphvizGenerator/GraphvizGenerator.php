@@ -35,9 +35,9 @@ class GraphvizGenerator
             'color' => '#263238', // Blue Gray - 900
             'fill-color-1' => '#ECEFF1', // Blue Gray - 50
             'fill-color-2' => '#90A4AE', // Blue Gray - 300
-            'highlight-color' => '#B71C1C', // Red - 900
-            'highlight-fill-color-1' => '#FFEBEE', // Red - #50
-            'highlight-fill-color-2' => '#E57373', // Red - 300
+            'highlight-color' => '#1B5E20', // Indigo - 900
+            'highlight-fill-color-1' => '#E8F5E9', // Indigo - #50
+            'highlight-fill-color-2' => '#4CAF50', // Indigo - 300
         ));
     }
 

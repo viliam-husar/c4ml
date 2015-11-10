@@ -17,5 +17,8 @@
     "psr-4": {
       "ViliamHusar\\": "src/"
     }
-  }
+  },
+  "bin": [
+    "bin/c4ml"
+  ]
 }
