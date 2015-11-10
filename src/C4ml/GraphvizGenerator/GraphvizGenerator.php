@@ -195,7 +195,7 @@ class GraphvizGenerator
                 }
 
                 if (true === $createInternalSystemNode) {
-                    $internalSystemNode = $this->createInternalSystemNode($internalSystem);
+                    $internalSystemNode = $this->createInternalSystemNode($internalSystem, $highlight);
                     $graph->setNode($internalSystemNode);
 
                     $elementsNodes[$container->getId()] = $internalSystemNode;
@@ -250,7 +250,7 @@ LABEL;
         return $internalSystemGraph;
     }
 
-    protected function createExternalSystemNode(ExternalSystem $externalSystem, $highlight)
+    protected function createExternalSystemNode(ExternalSystem $externalSystem, $highlight = false)
     {
         $description = wordwrap($externalSystem->getDescription(), 20, "<br />\n");
 
@@ -276,7 +276,7 @@ LABEL;
         return $externalSystemNode;
     }
 
-    protected function createInternalSystemNode(InternalSystem $internalSystem, $highlight)
+    protected function createInternalSystemNode(InternalSystem $internalSystem, $highlight = false)
     {
         $description = wordwrap($internalSystem->getDescription(), 20, "<br />\n");
 
@@ -336,7 +336,7 @@ LABEL;
         return $containerNode;
     }
 
-    protected function createInternalUserNode(InternalUser $internalUser, $highlight)
+    protected function createInternalUserNode(InternalUser $internalUser, $highlight = false)
     {
         $description = wordwrap($internalUser->getDescription(), 20, "<br />\n");
 
@@ -361,7 +361,7 @@ LABEL;
         return $internalUserNode;
     }
 
-    protected function createExternalUserNode(ExternalUser $externalUser, $highlight)
+    protected function createExternalUserNode(ExternalUser $externalUser, $highlight = false)
     {
         $description = wordwrap($externalUser->getDescription(), 20, "<br />\n");
 
