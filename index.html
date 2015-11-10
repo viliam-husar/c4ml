@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>C4ML by viliam-husar</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>C4ML</h1>
+        <p>C4 Architecture Model Diagram Generator</p>
+
+        <p class="view"><a href="https://github.com/viliam-husar/c4ml">View the Project on GitHub <small>viliam-husar/c4ml</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/viliam-husar/c4ml/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/viliam-husar/c4ml/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/viliam-husar/c4ml">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="c4-architecture-model-diagram-generator" class="anchor" href="#c4-architecture-model-diagram-generator" aria-hidden="true"><span class="octicon octicon-link"></span></a>C4 Architecture Model Diagram Generator</h1>
+
+<p>This application was inspired by C4 software architecture model, as <a href="https://www.voxxed.com/blog/2014/10/simple-sketches-for-diagramming-your-software-architecture/">described by Simon Brown</a>.</p>
+
+<p><strong>Note: Still WIP.</strong></p>
+
+<h2>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements</h2>
+
+<ul>
+<li>PHP 5.5+</li>
+<li>Graphviz (dor)</li>
+</ul>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Right now you can install C4ML by composer. More options to come in future.</p>
+
+<div class="highlight highlight-source-shell"><pre>$ composer require viliam-husar/c4ml</pre></div>
+
+<p>After installation you can run C4ML by:</p>
+
+<div class="highlight highlight-source-shell"><pre>$ bin/vendor/c4ml</pre></div>
+
+<h2>
+<a id="syntax" class="anchor" href="#syntax" aria-hidden="true"><span class="octicon octicon-link"></span></a>Syntax</h2>
+
+<p>See example.c4ml for syntax. Some limitations:</p>
+
+<ul>
+<li>You need to use unique id for each part of model.</li>
+<li>When defining usages, you can refer only from/to: Container, External System, Internal User, External User.</li>
+</ul>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>There are several options for C4ML to process your model. To see them all just use the --help option:</p>
+
+<h3>
+<a id="specify-output-format" class="anchor" href="#specify-output-format" aria-hidden="true"><span class="octicon octicon-link"></span></a>Specify output format</h3>
+
+<p>Because C4ML is using Graphviz for rendering, you might render your model diagram in multiple formats (svg is default).</p>
+
+<div class="highlight highlight-source-shell"><pre>$ bin/vendor/c4ml example.c4ml example.svg -f svg
+$ bin/vendor/c4ml example.c4ml example.png -f png</pre></div>
+
+<h3>
+<a id="select-internal-systems-with-containers-view" class="anchor" href="#select-internal-systems-with-containers-view" aria-hidden="true"><span class="octicon octicon-link"></span></a>Select internal systems with containers view</h3>
+
+<p>By default all internal systems are displayed in container view and with all related elements. If you have
+large model with multiple internal systems, you might select which of them should be displayed in this way.
+All other internal systems will be displayed in system view and only if required by selected internal systems.</p>
+
+<div class="highlight highlight-source-shell"><pre>$ bin/vendor/c4ml example.c4ml example.svg -s site
+$ bin/vendor/c4ml example.c4ml example.svg -s site -s orders</pre></div>
+
+<h3>
+<a id="highlight-elements-containers-external-systems-internal-users-external-users" class="anchor" href="#highlight-elements-containers-external-systems-internal-users-external-users" aria-hidden="true"><span class="octicon octicon-link"></span></a>Highlight elements (Containers, External Systems, Internal Users, External Users)</h3>
+
+<p>In some cases you may need to highlight one or more elements in you diagram. For this purpose use
+option <code>-l|--highligt</code>:</p>
+
+<div class="highlight highlight-source-shell"><pre>$ bin/vendor/c4ml example.c4ml example.svg -l site
+$ bin/vendor/c4ml example.c4ml example.svg -l site -l orders</pre></div>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/viliam-husar">viliam-husar</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
