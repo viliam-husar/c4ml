@@ -2,6 +2,8 @@
 
 namespace ViliamHusar\C4ml;
 
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\Processor;
 use ViliamHusar\C4ml\Model\Container;
 use ViliamHusar\C4ml\Model\ExternalSystem;
 use ViliamHusar\C4ml\Model\ExternalUser;
@@ -20,18 +22,115 @@ class C4ml
      * @param string $content
      *
      * @return Model
+     *
      */
     public static function parse($content)
     {
         $content = Yaml::parse($content);
+
+        $treeBuilder = new TreeBuilder();
+        $rootNode = $treeBuilder->root('model');
+        $rootNode
+            ->normalizeKeys(false)
+            ->children()
+            ->scalarNode('name')->end()
+            ->scalarNode('desc')->defaultNull()->end()
+            ->arrayNode('internal-systems')
+            ->normalizeKeys(false)
+            ->prototype('array')
+            ->children()
+            ->scalarNode('name')->end()
+            ->scalarNode('desc')->defaultNull()->end()
+            ->arrayNode('containers')
+            ->normalizeKeys(false)
+            ->prototype('array')
+            ->children()
+            ->scalarNode('name')->end()
+            ->scalarNode('desc')->defaultNull()->end()
+            ->scalarNode('type')->defaultNull()->end()
+            ->arrayNode('uses')
+            ->normalizeKeys(false)
+            ->prototype('array')
+            ->children()
+            ->scalarNode('for')->defaultNull()->end()
+            ->scalarNode('type')->defaultNull()->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end()
+            ->arrayNode('external-systems')
+            ->normalizeKeys(false)
+            ->prototype('array')
+            ->children()
+            ->scalarNode('name')->end()
+            ->scalarNode('desc')->defaultNull()->end()
+            ->arrayNode('uses')
+            ->normalizeKeys(false)
+            ->prototype('array')
+            ->children()
+            ->scalarNode('for')->defaultNull()->end()
+            ->scalarNode('type')->defaultNull()->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end()
+            ->arrayNode('internal-users')
+            ->normalizeKeys(false)
+            ->prototype('array')
+            ->children()
+            ->scalarNode('name')->end()
+            ->scalarNode('desc')->defaultNull()->end()
+            ->arrayNode('uses')
+            ->normalizeKeys(false)
+            ->prototype('array')
+            ->children()
+            ->scalarNode('for')->defaultNull()->end()
+            ->scalarNode('type')->defaultNull()->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end()
+            ->arrayNode('external-users')
+            ->normalizeKeys(false)
+            ->prototype('array')
+            ->children()
+            ->scalarNode('name')->end()
+            ->scalarNode('desc')->defaultNull()->end()
+            ->arrayNode('uses')
+            ->normalizeKeys(false)
+            ->prototype('array')
+            ->children()
+            ->scalarNode('for')->defaultNull()->end()
+            ->scalarNode('type')->defaultNull()->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end();
+
+
+        $processor = new Processor();
+        $modelContent = $processor->process($treeBuilder->buildTree(), $content);
+
         /** @var ElementInterface[] $elements */
         $elements = [];
 
         // create model
-        $model = new Model($content['model']['name'], $content['model']['desc']);
+        $model = new Model($modelContent['name'], $modelContent['desc']);
 
         // parse internal systems
-        foreach ($content['model']['internal-systems'] as $internalSystemId => $internalSystemContent) {
+        foreach ($modelContent['internal-systems'] as $internalSystemId => $internalSystemContent) {
             $internalSystem = new InternalSystem($internalSystemId, $internalSystemContent['name'], $internalSystemContent['desc']);
 
             foreach ($internalSystemContent['containers'] as $containerId => $containerContent) {
@@ -45,7 +144,7 @@ class C4ml
         }
 
         // parse external systems
-        foreach ($content['model']['external-systems'] as $externalSystemId => $externalSystemContent) {
+        foreach ($modelContent['external-systems'] as $externalSystemId => $externalSystemContent) {
             $externalSystem = new ExternalSystem($externalSystemId, $externalSystemContent['name'], $externalSystemContent['desc']);
 
             $model->addExternalSystem($externalSystem);
@@ -53,14 +152,14 @@ class C4ml
         }
 
         // parse internal users
-        foreach ($content['model']['internal-users'] as $internalUserId => $internalUserContent) {
+        foreach ($modelContent['internal-users'] as $internalUserId => $internalUserContent) {
             $internalUser = new InternalUser($internalUserId, $internalUserContent['name'], $internalUserContent['desc']);
 
             $model->addInternalUser($internalUser);
             $elements[$internalUser->getId()] = $internalUser;
         }
         // parse external users
-        foreach ($content['model']['external-users'] as $externalUserId => $externalUserContent) {
+        foreach ($modelContent['external-users'] as $externalUserId => $externalUserContent) {
             $externalUser = new ExternalUser($externalUserId, $externalUserContent['name'], $externalUserContent['desc']);
 
             $model->addExternalUser($externalUser);
@@ -68,7 +167,7 @@ class C4ml
         }
 
         // parse usages in internal systems
-        foreach ($content['model']['internal-systems'] as $internalSystemId => $internalSystemContent) {
+        foreach ($modelContent['internal-systems'] as $internalSystemId => $internalSystemContent) {
             foreach ($internalSystemContent['containers'] as $containerId => $containerContent) {
                 foreach ($containerContent['uses'] as $targetId => $usageContent) {
                     $usage = new Usage($elements[$targetId], $usageContent['for'], $usageContent['type']);
@@ -77,7 +176,7 @@ class C4ml
             }
         }
         // parse usages in external systems
-        foreach ($content['model']['external-systems'] as $externalSystemId => $externalSystemContent) {
+        foreach ($modelContent['external-systems'] as $externalSystemId => $externalSystemContent) {
             foreach ($externalSystemContent['uses'] as $targetId => $usageContent) {
                 $usage = new Usage($elements[$targetId], $usageContent['for'], $usageContent['type']);
                 $elements[$externalSystemId]->uses($usage);
@@ -85,7 +184,7 @@ class C4ml
         }
 
         // parse usages in internal users
-        foreach ($content['model']['internal-users'] as $internalUserId => $internalUserContent) {
+        foreach ($modelContent['internal-users'] as $internalUserId => $internalUserContent) {
             foreach ($internalUserContent['uses'] as $targetId => $usageContent) {
                 $usage = new Usage($elements[$targetId], $usageContent['for'], $usageContent['type']);
                 $elements[$internalUserId]->uses($usage);
@@ -93,7 +192,7 @@ class C4ml
         }
 
         // parse usages in external users
-        foreach ($content['model']['external-users'] as $externalUserId => $externalUserContent) {
+        foreach ($modelContent['external-users'] as $externalUserId => $externalUserContent) {
             foreach ($externalUserContent['uses'] as $targetId => $usageContent) {
                 $usage = new Usage($elements[$targetId], $usageContent['for'], $usageContent['type']);
                 $elements[$externalUserId]->uses($usage);
